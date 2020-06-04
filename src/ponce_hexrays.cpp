@@ -1,6 +1,6 @@
 //! \file
 /*
-**  Copyright (c) 2016 - Ponce
+**  Copyright (c) 2020 - Ponce
 **  Authors:
 **         Alberto Garcia Illera        agarciaillera@gmail.com
 **         Francisco Oca                francisco.oca.gonzalez@gmail.com
@@ -13,6 +13,8 @@
 #include "globals.hpp"
 
 #include <hexrays.hpp>
+
+bool hexrays_present = false;
 
 /* Returns the pseudocode line corresponding to an address or -1 if fail*/
 int get_compile_coord_by_ea(cfunc_t* cfunc, ea_t addr) {

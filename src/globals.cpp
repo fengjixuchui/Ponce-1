@@ -1,6 +1,6 @@
 //! \file
 /*
-**  Copyright (c) 2016 - Ponce
+**  Copyright (c) 2020 - Ponce
 **  Authors:
 **         Alberto Garcia Illera        agarciaillera@gmail.com
 **         Francisco Oca                francisco.oca.gonzalez@gmail.com
@@ -37,6 +37,4 @@ triton::API api;
 
 std::map<ea_t, struct instruction_info> ponce_comments;
 
-bool hexrays_present = false;
 
-ponce_table_chooser_t* ponce_table_chooser = nullptr;

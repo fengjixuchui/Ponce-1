@@ -1,6 +1,6 @@
 //! \file
 /*
-**  Copyright (c) 2016 - Ponce
+**  Copyright (c) 2020 - Ponce
 **  Authors:
 **         Alberto Garcia Illera        agarciaillera@gmail.com
 **         Francisco Oca                francisco.oca.gonzalez@gmail.com
@@ -18,3 +18,5 @@ int idaapi ponce_hexrays_callback(void*, hexrays_event_t event, va_list va);
 ssize_t idaapi ponce_hexrays_callback(void*, hexrays_event_t event, va_list va);
 #endif
 #endif
+
+extern bool hexrays_present;

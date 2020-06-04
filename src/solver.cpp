@@ -22,12 +22,18 @@ std::vector<Input> solve_formula(ea_t pc, int path_constraint_index)
     // We are going to store here the constraints for the previous conditions
     // We can not initializate this to null, so we do it to a true condition (based on code_coverage_crackme_xor.py from the triton project)
     auto previousConstraints = ast->equal(ast->bvtrue(), ast->bvtrue());
+    //auto previousConstraints = ast->bvtrue();
 
     // Add user define constraints (borrar en reejecuccion, poner mensaje if not sat, 
     // ToDo: Alberto, right now it crashes here
-    //for (const auto& [id, user_constrain] : ponce_table_chooser->constrains) {
-    //    previousConstraints = ast->land(previousConstraints, user_constrain);
-    //}
+    if (ponce_table_chooser){
+        for (const auto& [id, constrain] : ponce_table_chooser->constrains) {
+            for (const auto& [abstract_node_constrain, str_constrain] : constrain) {
+                previousConstraints = ast->land(previousConstraints, abstract_node_constrain);
+            }
+        }
+    }
+    
 
     // First we iterate through the previous path constrains to add the predicates of the taken path
     unsigned int j;
@@ -46,21 +52,11 @@ std::vector<Input> solve_formula(ea_t pc, int path_constraint_index)
     for (auto const& [taken, srcAddr, dstAddr, constraint] : pathConstrains[path_constraint_index].getBranchConstraints()) {
         if (!taken) {
             // We concatenate the previous constraints for the taken path plus the non taken constrain of the user selected condition
-            auto final_expr = ast->land(previousConstraints, constraint);
-            if (cmdOptions.showExtraDebugInfo) {
+            triton::ast::SharedAbstractNode final_expr = ast->land(previousConstraints, constraint);
+            if (cmdOptions.showExtraDebugInfo) {  
                 std::stringstream ss;
-                /*Create the full formula*/
-                ss << "(set-logic QF_AUFBV)\n";
-                /* Then, delcare all symbolic variables */
-                for (auto it : api.getSymbolicVariables()) {
-                    ss << ast->declare(ast->variable(it.second));
-
-                }
-                /* And concat the user expression */
-                ss << "\n\n";
-                ss << final_expr;
-                ss << "\n(check-sat)";
-                ss << "\n(get-model)";
+                ss << "(set-logic QF_AUFBV)" << std::endl;
+                api.printSlicedExpressions(ss, api.newSymbolicExpression(final_expr), true);      
                 msg("[+] Formula:\n%s\n\n", ss.str().c_str());
             }
 
@@ -93,16 +89,31 @@ std::vector<Input> solve_formula(ea_t pc, int path_constraint_index)
                     switch (symbVar->getSize())
                     {
                     case 8:
-                        msg(" - %s (%s): %#02x (%c)\n", model.getVariable()->getName().c_str(), symbVarComment.c_str(), model_value.convert_to<uchar>(), model_value.convert_to<uchar>() == 0 ? ' ' : model_value.convert_to<uchar>());
+                        msg(" - %s%s: %#02x (%c)\n", 
+                            model.getVariable()->getName().c_str(), 
+                            !symbVarComment.empty()? (" ("+symbVarComment+")").c_str():"",
+                            model_value.convert_to<uchar>(), 
+                            model_value.convert_to<uchar>() == 0 ? ' ' : model_value.convert_to<uchar>());
                         break;
                     case 16:
-                        msg(" - %s (%s): %#04x (%c%c)\n", model.getVariable()->getName().c_str(), symbVarComment.c_str(), model_value.convert_to<ushort>(), model_value.convert_to<uchar>() == 0 ? ' ' : model_value.convert_to<uchar>(), (unsigned char)(model_value.convert_to<ushort>() >> 8) == 0 ? ' ' : (unsigned char)(model_value.convert_to<ushort>() >> 8));
+                        msg(" - %s%s: %#04x (%c%c)\n", 
+                            !symbVarComment.empty() ? (" (" + symbVarComment + ")").c_str() : "",
+                            symbVarComment.c_str(), 
+                            model_value.convert_to<ushort>(), 
+                            model_value.convert_to<uchar>() == 0 ? ' ' : model_value.convert_to<uchar>(), 
+                            (unsigned char)(model_value.convert_to<ushort>() >> 8) == 0 ? ' ' : (unsigned char)(model_value.convert_to<ushort>() >> 8));
                         break;
                     case 32:
-                        msg(" - %s (%s): %#08x\n", model.getVariable()->getName().c_str(), symbVarComment.c_str(), model_value.convert_to<uint32>());
+                        msg(" - %s%s: %#08x\n", 
+                            !symbVarComment.empty() ? (" (" + symbVarComment + ")").c_str() : "",
+                            symbVarComment.c_str(), 
+                            model_value.convert_to<uint32>());
                         break;
                     case 64:
-                        msg(" - %s (%s): %#16llx\n", model.getVariable()->getName().c_str(), symbVarComment.c_str(), model_value.convert_to<uint64>());
+                        msg(" - %s%s: %#16llx\n", 
+                            model.getVariable()->getName().c_str(), 
+                            !symbVarComment.empty() ? (" (" + symbVarComment + ")").c_str() : "",
+                            model_value.convert_to<uint64>());
                         break;
                     default:
                         msg("[!] Unsupported size for the symbolic variable: %s (%s)\n", model.getVariable()->getName().c_str(), symbVarComment.c_str()); // what about 128 - 512 registers? 

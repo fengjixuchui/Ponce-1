@@ -1,6 +1,6 @@
 //! \file
 /*
-**  Copyright (c) 2016 - Ponce
+**  Copyright (c) 2020 - Ponce
 **  Authors:
 **         Alberto Garcia Illera        agarciaillera@gmail.com
 **         Francisco Oca                francisco.oca.gonzalez@gmail.com
@@ -20,8 +20,6 @@
 
 //Triton
 #include <triton/api.hpp>
-//Version number
-#include "../VERSION_NUMBER"
 
 #define strtol_m strtoll
 
@@ -108,5 +106,3 @@ extern std::map<ea_t, struct instruction_info> ponce_comments;
 #define REG_XIP api.registers.x86_eip
 #endif // __EA64__
 
-extern ponce_table_chooser_t* ponce_table_chooser;
-extern bool hexrays_present;
