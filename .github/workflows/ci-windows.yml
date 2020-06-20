@@ -64,7 +64,7 @@ jobs:
                   cmake -S . -B build_x64_7.3 -DIDASDK_ROOT_DIR="..\IDA_SDKs\idasdk73" -DSTATICLIB=ON -DCMAKE_BUILD_TYPE=Release -G "Visual Studio 16 2019" -A x64 -DVCPKG_TARGET_TRIPLET="x64-windows-static" -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT\scripts\buildsystems\vcpkg.cmake" -DTRITON_INCLUDE_DIR="..\Triton\install_dir\include" -DTRITON_LIBRARY="..\Triton\install_dir\lib\triton.lib"          
                   cmake --build build_x64_7.3 --config Release --parallel 2
             
-            - name: Build Ponce 7.4
+            - name: Build Ponce IDA 7.4
               run: |
                   powershell Expand-Archive -Force ..\IDA_SDKs\idasdk74.zip ..\IDA_SDKs
                   cmake -S . -B build_x64_7.4 -DIDASDK_ROOT_DIR="..\IDA_SDKs\idasdk74" -DSTATICLIB=ON -DCMAKE_BUILD_TYPE=Release -G "Visual Studio 16 2019" -A x64 -DVCPKG_TARGET_TRIPLET="x64-windows-static" -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT\scripts\buildsystems\vcpkg.cmake" -DTRITON_INCLUDE_DIR="..\Triton\install_dir\include" -DTRITON_LIBRARY="..\Triton\install_dir\lib\triton.lib"          
@@ -137,36 +137,28 @@ jobs:
                   name: Ponce_7.5.dll
                   path: build_x64_7.5/Release/Ponce.dll
                   
-    # release:
-        # runs-on: ubuntu-latest
-        # if: github.event_name == 'release'
-        # needs: build
-        # steps:
-            # - name: Download CidSSH ssh version
-              # uses: actions/download-artifact@v1
-              # with:
-                  # name: CidSSH_win_ssh_x64.exe
+    release:
+        runs-on: ubuntu-latest
+        if: github.event_name == 'release'
+        needs: build
+        steps:
+            - name: Download all windows arifacts
+              uses: actions/download-artifact@v2
+              with:
+                  path: my_artifacts
             
-            # - name: Upload ssh arifact to Github release
-              # uses: actions/upload-release-asset@v1
-              # env:
-                    # GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              # with:
-                  # upload_url: ${{ github.event.release.upload_url }}
-                  # asset_path: CidSSH_win_ssh_x64.exe/CidSSH.exe
-                  # asset_name: CidSSH_win_ssh_x64.exe
-                  # asset_content_type: application/octet-stream
+            - name: Display structure of downloaded files
+              run: |
+                  dir my_artifacts
+            
+            - name: Upload ssh arifact to Github release
+              uses: actions/upload-release-asset@v1
+              env:
+                    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                  upload_url: ${{ github.event.release.upload_url }}
+                  asset_path: my_artifacts/Ponce_7.4.dll
+                  asset_name: Ponce_7.4.dll
+                  asset_content_type: application/octet-stream
                   
-            # - name: Download CidSSH ws version
-              # uses: actions/download-artifact@v1
-              # with:
-                  # name: CidSSH_win_ws_x64.exe
-            # - name: Upload ws arifact to Github release
-              # uses: actions/upload-release-asset@v1
-              # env:
-                    # GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              # with:
-                  # upload_url: ${{ github.event.release.upload_url }}
-                  # asset_path: CidSSH_win_ws_x64.exe/CidSSH.exe
-                  # asset_name: CidSSH_win_ws_x64.exe
-                  # asset_content_type: application/octet-stream      
+           
