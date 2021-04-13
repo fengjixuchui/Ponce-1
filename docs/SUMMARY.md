@@ -21,4 +21,6 @@
 * [Ponce limitations](misc/ponce-limitations.md)
 * [Building](misc/building.md)
 * [FAQ](misc/faq.md)
+* [Debugging](misc/debugging.md)
+* [Port to IDA version](misc/port.md)
 
